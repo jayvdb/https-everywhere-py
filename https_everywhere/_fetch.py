@@ -12,7 +12,13 @@ _ts = None
 
 def _storage_location(filename=None, timestamp=None):
     cache_dir = appdirs.user_cache_dir("https-everywhere-py")
-    os.makedirs(cache_dir, exist_ok=True)
+    try:
+        os.makedirs(cache_dir, exist_ok=True)
+    except TypeError:
+        try:
+            os.makedirs(cache_dir)
+        except (IOError, OSError):
+            pass
 
     if timestamp:
         filename = "default.rulesets.{}".format(timestamp)
