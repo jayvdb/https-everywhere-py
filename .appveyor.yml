@@ -5,6 +5,7 @@ environment:
     - TOXENV: py36
     - TOXENV: py35
     - TOXENV: py34
+    - TOXENV: py27
 install:
   - pip install tox
 build: false
