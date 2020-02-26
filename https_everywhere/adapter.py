@@ -302,11 +302,7 @@ class UpgradeHTTPSAdapter(ForceHTTPSAdapter):
 
 class SafeUpgradeHTTPSAdapter(ForceHTTPSAdapter):
 
-    _https_downgrade_exceptions = (
-        requests.exceptions.ConnectionError,
-        urllib3.exceptions.MaxRetryError,
-        requests.exceptions.SSLError,
-    )
+    _https_downgrade_exceptions = UpgradeHTTPSAdapter._https_downgrade_exceptions
 
     def send(self, request, *args, **kwargs):
         url = request.url

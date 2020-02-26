@@ -7,6 +7,51 @@ Emphasis is on converting those rulesets to simpler or more common rules to redu
 
 Current list of data problems can be found in `https_everywhere/_fixme.py`.  Many of these have patches sent upstream to the main HTTPS Everywhere project.
 
+## Usage
+
+``py
+from https_everywhere.session import HTTPSEverywhereSession
+
+s = HTTPSEverywhereSession()
+r = s.get("http://freerangekitten.com/")
+r.raise_for_status()
+
+assert r.url == "https://freerangekitten.com/"
+assert len(r.history) == 1
+assert r.history[0].status_code == 302
+assert r.history[0].reason == "HTTPS Everywhere"
+```
+
+The log will emit
+```console
+[W 200226 09:40:55 _rules:632] Rejecting rule with pattern "^http://ww2\.epeat\.com/"
+[W 200226 09:40:55 _rules:640] Rejecting ruleset EPEAT (partial) as it has no usable rules
+[W 200226 09:40:55 _rules:632] Rejecting rule with pattern "^http://(?:dashboard(?:-cdn)?|g-pixel|pixel|segment-pixel)\.invitemedia\.com/"
+[W 200226 09:40:55 _rules:632] Rejecting rule with pattern "^http://((?:a[lt]|s|sca)\d*|www)\.listrakbi\.com/"
+[W 200226 09:40:55 _rules:640] Rejecting ruleset ListrakBI.com as it has no usable rules
+[W 200226 09:40:55 _rules:632] Rejecting rule with pattern "^http://demo\.neobookings\.com/"
+[W 200226 09:40:55 _rules:632] Rejecting rule with pattern "^http://(www\.)?partners\.peer1\.ca/"
+[W 200226 09:40:55 _rules:640] Rejecting ruleset Peer1.ca (partial) as it has no usable rules
+[W 200226 09:40:55 _rules:632] Rejecting rule with pattern "^http://support\.pickaweb\.co\.uk/(assets/)"
+[W 200226 09:40:55 _rules:632] Rejecting rule with pattern "^http://www\.svenskaspel\.se/"
+[W 200226 09:40:55 _rules:632] Rejecting rule with pattern "^http://cdn\.therepublic\.com/"
+[W 200226 09:40:55 _rules:640] Rejecting ruleset The Republic (partial) as it has no usable rules
+```
+
+### Adapters
+
+There are many adapters in https_everywhere.adapter which can be used depending on use cases.
+
+Adapters can be mounted on 'http://', or a narrower mount point.
+
+* HTTPSEverywhereOnlyAdapter
+* ChromePreloadHSTSAdapter
+* HTTPSEverywhereAdapter - Chrome preload hsts and https everywhere rules
+* ForceHTTPSAdapter - Just use HTTPS, always, everywhere
+* PreferHTTPSAdapter - Check HTTP if there are any redirects, before switching to HTTPS.
+* UpgradeHTTPSAdapter - Force HTTPS, but fall back to HTTP when HTTPS problems occur.
+* SafeUpgradeHTTPSAdapter - First check HTTP if there are any redirects, force HTTPS, and fallback to HTTP.
+
 ## Testing
 
 To test
