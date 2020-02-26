@@ -65,4 +65,7 @@ def fetch_update(timestamp=None):
     data = gzip.GzipFile(fileobj=r.raw).read()
     with open(location, "wb") as f:
         f.write(data)
-    return json.loads(data)
+    try:
+        return json.loads(data)
+    except TypeError:
+        return json.loads(data.decode("utf-8"))
