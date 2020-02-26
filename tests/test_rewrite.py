@@ -1,13 +1,19 @@
+from __future__ import unicode_literals
+
 import unittest
 
 try:
     from urllib.parse import urlparse
 except ImportError:
-    from urllib2 import urlparse
+    from urlparse import urlparse
 
 import urllib3.util
 
 from https_everywhere._rules import https_url_rewrite
+
+PY2 = str != "".__class__
+if PY2:
+    str = "".__class__
 
 
 class TestRewrite(unittest.TestCase):

@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import glob
 import json
 import os.path
@@ -8,6 +10,10 @@ from unittest_expander import foreach, expand
 
 from https_everywhere._rules import https_url_rewrite, _reduce_rules
 from https_everywhere._fixme import _FIXME_INCORRECT_TEST_URLS
+
+PY2 = str != "".__class__
+if PY2:
+    str = "".__class__
 
 project_root = os.path.join(os.path.dirname(__file__), "..")
 https_everything_project = os.path.join(project_root, "..", "https-everywhere")

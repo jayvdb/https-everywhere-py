@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import logging
 
 import urllib3
@@ -12,6 +14,10 @@ from ._chrome_preload_hsts import _preload_including_subdomains
 from ._util import _check_in
 
 from logzero import setup_logger
+
+PY2 = str != "".__class__
+if PY2:
+    str = "".__class__
 
 _REASON = "HTTPS Everywhere"
 logger = setup_logger(name="httpseverwhere.adapter", level=logging.INFO)
@@ -37,6 +43,8 @@ class HTTPSEverywhereOnlyAdapter(HTTPAdapter):
         url = request.url
 
         if url.startswith("http://"):
+            if PY2:
+                url = str(url)
             url = https_url_rewrite(url)
             if url.startswith("https://"):
                 logger.info("adapter redirecting {} to {}".format(request.url, url))

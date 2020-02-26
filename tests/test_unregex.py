@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import sre_compile
 import sre_parse
 import sys

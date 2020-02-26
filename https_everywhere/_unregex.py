@@ -129,7 +129,7 @@ def split_regex(pattern, at, remainer=False):
         new = sre_parse.SubPattern(pattern.pattern)
     else:
         new = None
-    for i, (tok, val) in enumerate(pattern.data.copy()):
+    for i, (tok, val) in enumerate(list(pattern.data)):
         if not found and tok == sre_parse.LITERAL and val == ord(at):
             found = True
             del pattern[i]

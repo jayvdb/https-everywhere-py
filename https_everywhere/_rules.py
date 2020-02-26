@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import re
 import logging
 
@@ -20,6 +22,9 @@ from ._fixme import (
 
 logger = setup_logger(name="httpseverywhere.rules", level=logging.INFO)
 
+PY2 = str != "".__class__
+if PY2:
+    str = "".__class__
 
 # regex sizeof() is broken, and it appears slower;
 # real benchmarking needed
@@ -521,7 +526,7 @@ def _reduce_rules(rulesets, check=False):
 
         # https://github.com/EFForg/https-everywhere/issues/18892
         if "accounts.google.com.*" in targets or "www.google.com.*" in targets:
-            for item in targets.copy():
+            for item in list(targets):
                 if item.endswith("google.com.*") and item.rstrip(".*") not in targets:
                     targets.append(item.rstrip(".*"))
 
