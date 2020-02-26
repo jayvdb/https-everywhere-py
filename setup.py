@@ -28,7 +28,7 @@ setup(
     author_email="jayvdb@gmail.com",
     url="https://github.com/jayvdb/https-everywhere-py",
     packages=find_packages(exclude=["tests", "tests.*"]),
-    python_requires=">=3.6",
+    python_requires=">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*",
     install_requires=[
         "requests[security]",
         "sre-yield",
@@ -38,4 +38,5 @@ setup(
     ],
     classifiers=classifiers.splitlines(),
     tests_require=["unittest-expander", "lxml", "tldextract", "regex"],
+    # lxml is optional, needed for testing upstream rules
 )

@@ -1,6 +1,10 @@
 environment:
   matrix:
+    - TOXENV: py38
     - TOXENV: py37
+    - TOXENV: py36
+    - TOXENV: py35
+    - TOXENV: py34
 install:
   - pip install tox
 build: false
@@ -8,6 +12,4 @@ test_script:
   - git clone --depth 1 https://github.com/EFForg/https-everywhere
   - mv https-everywhere ..
   - tox
-matrix:
-  fast_finish: true
 skip_branch_with_pr: true
