@@ -1,4 +1,5 @@
 import gzip
+import io
 import json
 import os
 import os.path
@@ -68,7 +69,11 @@ def fetch_update(timestamp=None):
     )
     r.raise_for_status()
     location = _storage_location(timestamp=timestamp)
-    data = gzip.GzipFile(fileobj=r.raw).read()
+    try:
+        data = gzip.GzipFile(fileobj=r.raw).read()
+    except Exception:
+        # r.raw (urllib3.Response) doesnt implement buffer interface
+        data = gzip.GzipFile(fileobj=io.BytesIO(r.raw.read())).read()
     with open(location, "wb") as f:
         f.write(data)
     try:
