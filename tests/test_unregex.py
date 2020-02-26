@@ -7,9 +7,20 @@ import unittest
 
 from sre_parse import LITERAL
 
-from https_everywhere._unregex import expand_pattern, split_regex
+try:
+    from https_everywhere._unregex import expand_pattern, split_regex
+except ImportError:
+    raise unittest.SkipTest(
+        "Rule analysis and simplification only supported on Python 3"
+    )
 
 PY38 = sys.version_info[:2] >= (3, 8)
+
+PY2 = str != "".__class__
+if PY2:
+    raise unittest.SkipTest(
+        "Rule analysis and simplification only supported on Python 3"
+    )
 
 
 class TestExpandRegex(unittest.TestCase):

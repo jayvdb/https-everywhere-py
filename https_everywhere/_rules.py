@@ -8,8 +8,6 @@ from cached_property import cached_property
 from urllib3.util.url import parse_url as urlparse
 
 from ._fetch import fetch_update
-from ._unregex import expand_pattern, ExpansionError
-
 from ._fixme import (
     # _FIXME_MULTIPLE_RULEST_PREFIXES,
     _FIXME_REJECT_PATTERNS,
@@ -20,11 +18,17 @@ from ._fixme import (
     _FIXME_SUBDOMAIN_PREFIXES,
 )
 
+try:
+    from ._unregex import expand_pattern, ExpansionError
+except ImportError:
+    expand_pattern, ExpansionError = None, None
+
 logger = setup_logger(name="httpseverywhere.rules", level=logging.INFO)
 
 PY2 = str != "".__class__
 if PY2:
     str = "".__class__
+    expand_pattern = None
 
 # regex sizeof() is broken, and it appears slower;
 # real benchmarking needed
@@ -303,6 +307,7 @@ def _reduce_ruleset(ruleset):
         try:
             pattern_targets = rule.pattern_targets
         except ExpansionError as e:
+            # TypeError occurs if sre_yield 0.2.0 was installed
             logger.info(
                 "expansion failure in rule {} {}: {}".format(
                     ruleset.targets, ruleset.rules, e
@@ -469,6 +474,10 @@ def _reduce_ruleset(ruleset):
 def _reduce_rules(rulesets, check=False):
     if isinstance(rulesets, dict):
         rulesets = rulesets["rulesets"]
+
+    if check and not expand_pattern:
+        logger.warning("Rule analysis and simplification only supported on Python 3")
+        check = False
 
     mapping = {}
     domains = set()

@@ -79,19 +79,16 @@ def expand_pattern(pattern, max_count=100):
 
     pattern = pattern.replace("*", "").rstrip("./").replace(r"\d+", r"\d\d")
 
-    # https://github.com/google/sre_yield/issues/6
-    pos = pattern.find("(?!")
-    if pos == 0:
-        pos = pattern.find(")")
-        if pos == -1:  # pragma: no cover
-            raise RuntimeError("couldnt find end of assertion in {}".format(pattern))
-        pattern = pattern[pos + 1 :]
-
     c = sre_parse.parse(pattern)
 
     c = split_regex(c, "/")[0]
 
-    rv = sre_yield.AllStrings(c, max_count=10, relaxed=True)[: max_count + 1]
+    try:
+        rv = sre_yield.AllStrings(c, max_count=10, relaxed=True)[: max_count + 1]
+    except TypeError:
+        raise ExpansionError(
+            "sre_yield 0.2.0 installed; please install master for expansion"
+        )
 
     # https://github.com/google/sre_yield/issues/16
     assert rv.__len__() <= max_count + 1, (rv.__len__(), max_count, pattern, c)
