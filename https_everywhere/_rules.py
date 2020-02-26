@@ -273,7 +273,7 @@ def _reduce_ruleset(ruleset):
         if len(rules) > 2:
             return False
 
-        last_rule = _Rule(*rules[-1], ruleset)
+        last_rule = _Rule(*rules[-1], ruleset=ruleset)
         if _is_rule_only_force_https(ruleset, last_rule):
             logger.warning(
                 "{} last rule of {} rules reduced to simple force https".format(
