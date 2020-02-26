@@ -120,11 +120,15 @@ def expand_pattern(pattern, max_count=100):
     return [i.replace("~~", "*.").replace("~", "*").replace(",,", ".*") for i in rv]
 
 
-def split_regex(pattern, at):
+def split_regex(pattern, at, remainer=False):
     if not isinstance(pattern, sre_parse.SubPattern):
         pattern = sre_parse.parse(pattern)
     found = False
-    new = sre_parse.SubPattern(pattern.pattern)
+    if remainer:
+        # This doesnt work on Python 3.8
+        new = sre_parse.SubPattern(pattern.pattern)
+    else:
+        new = None
     for i, (tok, val) in enumerate(pattern.data.copy()):
         if not found and tok == sre_parse.LITERAL and val == ord(at):
             found = True
@@ -141,7 +145,8 @@ def split_regex(pattern, at):
                 del pattern[i]
                 continue
         if found:
-            new.append((tok, val))
+            if remainer:
+                new.append((tok, val))
             del pattern[-1]
     if not found:
         return pattern, None
