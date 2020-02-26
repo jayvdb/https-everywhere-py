@@ -13,9 +13,11 @@ class TestFetch(unittest.TestCase):
     def test_storage_location(self):
         rv = _storage_location()
         if sys.platform == "win32":
-           self.assertTrue(rv.endswith("https-everywhere-py\\Cache"))
+            self.assertTrue(rv.endswith("https-everywhere-py\\Cache"))
+        elif sys.platform == "darwin":
+            self.assertTrue(rv.endswith("/Caches/https-everywhere-py"))
         else:
-           self.assertEqual(rv, os.path.expanduser("~/.cache/https-everywhere-py"))
+            self.assertEqual(rv, os.path.expanduser("~/.cache/https-everywhere-py"))
 
     def test_channel_timestamp(self):
         rv = fetch_channel_ts()
