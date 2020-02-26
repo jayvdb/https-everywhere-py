@@ -58,7 +58,7 @@ To test
 
 ```sh
 git clone https://github.com/jayvdb/https-everywhere-py
-git clone https://github.com/EFForg/https-everywhere
+git clone https://github.com/EFForg/https-everywhere  # possibly use --depth 1
 cd https-everywhere-py
 tox
 ```
