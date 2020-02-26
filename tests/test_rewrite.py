@@ -1,5 +1,9 @@
-import urllib.parse
 import unittest
+
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urllib2 import urlparse
 
 import urllib3.util
 
@@ -17,8 +21,8 @@ class TestRewrite(unittest.TestCase):
         self.assertIsInstance(url, str)
         self.assertTrue(url.startswith("http://"))
 
-    def test_urlparse_urllib(self):
-        url = urllib.parse.urlparse("http://packages.python.org/foo")
+    def test_urlparse_stdlib_urlparse(self):
+        url = urlparse("http://packages.python.org/foo")
         rv = https_url_rewrite(url)
         self._check_https(rv)
 
