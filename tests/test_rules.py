@@ -12,7 +12,8 @@ from https_everywhere._fixme import _FIXME_INCORRECT_TEST_URLS
 project_root = os.path.join(os.path.dirname(__file__), "..")
 https_everything_project = os.path.join(project_root, "..", "https-everywhere")
 
-assert os.path.exists(https_everything_project), "Clone https-everywhere beside https-everywhere-py"
+if not os.path.exists(https_everything_project):
+    raise unittest.SkipTest("Clone https-everywhere beside https-everywhere-py to run rule tests")
 
 https_everywhere_checker_root = os.path.join(https_everything_project, "test", "rules", "src")
 https_everywhere_checker_root_init = os.path.join(
