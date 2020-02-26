@@ -28,7 +28,7 @@ sys.path.append(https_everywhere_checker_root)
 
 from https_everywhere_checker.rules import Ruleset, Rule
 
-rules_path = os.path.join(https_everything_project, "rules")
+rules_path = os.path.join(https_everything_project, *("src/chrome/content/rules".split("/")))
 ruleset_file = os.path.join(rules_path, "default.rulesets")
 
 if not os.path.exists(ruleset_file):
@@ -40,6 +40,8 @@ _upstream_reduced = None
 _run_check = True
 
 xmlFnames = sorted(glob.glob(os.path.join(rules_path, "*.xml")))
+
+assert xmlFnames
 
 rulesets = {}
 
