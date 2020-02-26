@@ -73,14 +73,14 @@ def _load_upstream_reduced_rulesets():
 @expand
 class TestRules(unittest.TestCase):
     def _check_https(self, url):
-        assert url
-        assert isinstance(url, str)
-        assert url.startswith("https://")
+        self.assertIsNotNone(url)
+        self.assertIsInstance(url, str)
+        self.assertTrue(url.startswith("https://"))
 
     def _check_no_https(self, url):
-        assert url
-        assert isinstance(url, str)
-        assert url.startswith("http://")
+        self.assertIsNotNone(url)
+        self.assertIsInstance(url, str)
+        self.assertTrue(url.startswith("http://"))
 
     def _check_ruleset(self, ruleset, url=None):
         reduced_rulesets = _load_upstream_reduced_rulesets()

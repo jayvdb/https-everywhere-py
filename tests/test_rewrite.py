@@ -8,14 +8,14 @@ from https_everywhere._rules import https_url_rewrite
 
 class TestRewrite(unittest.TestCase):
     def _check_https(self, url):
-        assert url
-        assert isinstance(url, str)
-        assert url.startswith("https://")
+        self.assertIsNotNone(url)
+        self.assertIsInstance(url, str)
+        self.assertTrue(url.startswith("https://"))
 
     def _check_no_https(self, url):
-        assert url
-        assert isinstance(url, str)
-        assert url.startswith("http://")
+        self.assertIsNotNone(url)
+        self.assertIsInstance(url, str)
+        self.assertTrue(url.startswith("http://"))
 
     def test_urlparse_urllib(self):
         url = urllib.parse.urlparse("http://packages.python.org/foo")
