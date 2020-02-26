@@ -6,8 +6,6 @@ import unittest
 
 from unittest_expander import foreach, expand
 
-from lxml import etree
-
 from https_everywhere._rules import https_url_rewrite, _reduce_rules
 from https_everywhere._fixme import _FIXME_INCORRECT_TEST_URLS
 
@@ -26,7 +24,11 @@ if not os.path.exists(https_everywhere_checker_root_init):
 
 sys.path.append(https_everywhere_checker_root)
 
-from https_everywhere_checker.rules import Ruleset, Rule
+try:
+    from lxml import etree
+    from https_everywhere_checker.rules import Ruleset, Rule
+except ImportError as e:
+    raise unittest.SkipTest("https_everywhere_checker not importable: {}".format(e))
 
 rules_path = os.path.join(https_everything_project, *("src/chrome/content/rules".split("/")))
 ruleset_file = os.path.join(rules_path, "default.rulesets")
