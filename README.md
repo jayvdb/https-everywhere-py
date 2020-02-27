@@ -9,7 +9,7 @@ Current list of data problems can be found in `https_everywhere/_fixme.py`.  Man
 
 ## Usage
 
-``py
+```py
 from https_everywhere.session import HTTPSEverywhereSession
 
 s = HTTPSEverywhereSession()
