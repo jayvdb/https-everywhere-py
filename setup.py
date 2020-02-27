@@ -11,8 +11,12 @@ Intended Audience :: Science/Research
 Intended Audience :: System Administrators
 License :: OSI Approved :: Apache Software License
 Operating System :: OS Independent
+Programming Language :: Python :: 2.7
+Programming Language :: Python :: 3.4
+Programming Language :: Python :: 3.5
 Programming Language :: Python :: 3.6
 Programming Language :: Python :: 3.7
+Programming Language :: Python :: 3.8
 Programming Language :: Python :: Implementation :: CPython
 Topic :: Internet :: WWW/HTTP :: Browsers
 Topic :: Internet :: WWW/HTTP :: Session
@@ -22,7 +26,7 @@ Development Status :: 4 - Beta
 
 setup(
     name="https-everywhere",
-    version="0.2.0",
+    version="0.2.1",
     description="Privacy for Pythons. Requests adapters for HTTPS, including HSTS preloading and HTTPS Everywhere rules",
     license="Apache-2.0",
     author_email="jayvdb@gmail.com",
