@@ -74,80 +74,21 @@ class HTTPRedirectBlockAdapter(BlockCodeAdapter):
         return response
 
 
-class HTTPSEverywhereOnlyAdapter(HTTPAdapter):
-    def __init__(self, *args, **kwargs):
-        super(HTTPSEverywhereOnlyAdapter, self).__init__(*args, **kwargs)
-        # prime cache
-        _get_rulesets()
+class RedirectAdapter(HTTPAdapter):
 
-    def send(self, request, *args, **kwargs):
-        url = request.url
-
-        if url.startswith("http://"):
-            if PY2:
-                url = str(url)
-            url = https_url_rewrite(url)
-            if url.startswith("https://"):
-                logger.info("adapter redirecting {} to {}".format(request.url, url))
-                response = _generate_redirect(url)
-                response.request = request
-                response.url = request.url
-                return response
-
-        return super(HTTPSEverywhereOnlyAdapter, self).send(request, *args, **kwargs)
-
-
-class ChromePreloadHSTSAdapter(HTTPAdapter):
-    def __init__(self, *args, **kwargs):
-        super(ChromePreloadHSTSAdapter, self).__init__(*args, **kwargs)
-        # prime cache
-        self._domains = _preload_including_subdomains()
-
-    def send(self, request, *args, **kwargs):
-        url = request.url
-
-        if url.startswith("http://"):
-            p = parse_url(url)
-            if _check_in(self._domains, p.host):
-                new_url = "https:" + url[5:]
-                logger.info("adapter redirecting {} to {}".format(request.url, new_url))
-                response = _generate_redirect(new_url)
-                response.request = request
-                response.url = request.url
-                return response
-
-        return super(ChromePreloadHSTSAdapter, self).send(request, *args, **kwargs)
-
-
-class HTTPSEverywhereAdapter(ChromePreloadHSTSAdapter, HTTPSEverywhereOnlyAdapter):
-    pass
-
-
-class RedirectAdapter(HTTPAdapter):  # pragma: no cover
-
-    # TODO: add tests for this super class
+    redirect_code = 302
 
     @staticmethod
-    def gen_response(code=200, headers=None):
-        r = requests.Response()
-        r.encoding = "utf8"
-        r.status_code = code
-        r.reason = "FAKE REASON"
-        r._content = ""
-
-        if headers:
-            r.headers.update(headers)
-        return r
-
-    def gen_redirect(self, location, code=302):
-        response = self.gen_response(code, {"Location": location})
-        return response
+    def _generate_redirect(location, code=None):
+        return _generate_response(
+            code=RedirectAdapter.redirect_code, headers={"Location": location}
+        )
 
     def get_redirect(self, url):
-        return
+        logger.debug("No implementation for get_redirect({!r})".format(url))
 
     def send(self, request, *args, **kwargs):
-        code = 302
+        code = self.redirect_code
         rv = self.get_redirect(request.url)
         if rv is None:
             url = None
@@ -167,7 +108,7 @@ class RedirectAdapter(HTTPAdapter):  # pragma: no cover
         if url and url != request.url:
             # need to prevent redirecting to https when https has already downgraded to http
 
-            response = self.gen_redirect(url, code)
+            response = self._generate_redirect(url)
             response.request = request
             response.url = request.url
             response._redirected = True
@@ -183,12 +124,52 @@ class RedirectAdapter(HTTPAdapter):  # pragma: no cover
 
     def handle_error(self, exc, request=None):
         logger.error(
-            "handle_error", exc.__class__.__module__, exc.__class__.__name__, exc
+            "handle_error {}.{}: {}",
+            exc.__class__.__module__,
+            exc.__class__.__name__,
+            exc,
         )
         raise exc
 
 
-class ForceHTTPSAdapter(HTTPAdapter):
+class HTTPSEverywhereOnlyAdapter(RedirectAdapter):
+    def __init__(self, *args, **kwargs):
+        super(HTTPSEverywhereOnlyAdapter, self).__init__(*args, **kwargs)
+        # prime cache
+        _get_rulesets()
+
+    def get_redirect(self, url):
+        if url.startswith("http://"):
+            if PY2:
+                url = str(url)
+            new_url = https_url_rewrite(url)
+            if new_url.startswith("https://"):
+                return new_url
+
+        return super(HTTPSEverywhereOnlyAdapter, self).get_redirect(url)
+
+
+class ChromePreloadHSTSAdapter(RedirectAdapter):
+    def __init__(self, *args, **kwargs):
+        super(ChromePreloadHSTSAdapter, self).__init__(*args, **kwargs)
+        # prime cache
+        self._domains = _preload_including_subdomains()
+
+    def get_redirect(self, url):
+        if url.startswith("http://"):
+            p = parse_url(url)
+            if _check_in(self._domains, p.host):
+                new_url = "https:" + url[5:]
+                return new_url
+
+        return super(ChromePreloadHSTSAdapter, self).get_redirect(url)
+
+
+class HTTPSEverywhereAdapter(ChromePreloadHSTSAdapter, HTTPSEverywhereOnlyAdapter):
+    pass
+
+
+class ForceHTTPSAdapter(RedirectAdapter):
     def __init__(self, *args, **kwargs):
         https_exclusions = kwargs.pop("https_exclusions", [])
         super(ForceHTTPSAdapter, self).__init__(*args, **kwargs)
@@ -200,25 +181,17 @@ class ForceHTTPSAdapter(HTTPAdapter):
                 return True
         return False
 
-    def send(self, request, *args, **kwargs):
-        if request.url.startswith("https://"):
-            tail = request.url[8:]
+    def get_redirect(self, url):
+        if url.startswith("https://"):
+            tail = url[8:]
             if self._prevent_https(tail):
-                logger.info("downgraded {} to http".format(request.url))
-                response = _generate_redirect("http://" + tail)
-                response.request = request
-                response.url = request.url
-                return response
-        elif request.url.startswith("http://"):
-            tail = request.url[7:]
+                return "http://" + tail
+        elif url.startswith("http://"):
+            tail = url[7:]
             if not self._prevent_https(tail):
-                logger.info("upgrading {} to https".format(request.url))
-                response = _generate_redirect("https://" + tail)
-                response.request = request
-                response.url = request.url
-                return response
+                return "https://" + tail
 
-        return super(ForceHTTPSAdapter, self).send(request, *args, **kwargs)
+        return super(ForceHTTPSAdapter, self).get_redirect(url)
 
 
 # Rename to CheckHTTPRedirectAdapter ?
@@ -289,7 +262,7 @@ class PreferHTTPSAdapter(ForceHTTPSAdapter):
             tail = url[8:]
             if self._prevent_https(tail):
                 logger.info("downgraded {} to http".format(url))
-                response = _generate_redirect("http://" + tail)
+                response = self._generate_redirect("http://" + tail)
                 response.request = request
                 response.url = url
                 return response
@@ -315,7 +288,7 @@ class PreferHTTPSAdapter(ForceHTTPSAdapter):
                             )
                 logger.info("upgrading {} to https".format(url))
 
-                response = _generate_redirect("https://" + tail)
+                response = self._generate_redirect("https://" + tail)
                 response.request = request
                 response.url = request.url
                 return response
@@ -346,7 +319,7 @@ class UpgradeHTTPSAdapter(ForceHTTPSAdapter):
 
         request.url = "http://" + url[8:]
         # Note: skipping base classes including ForceHTTPSAdapter
-        return super(ForceHTTPSAdapter, self).send(request, *args, **kwargs)
+        return super(RedirectAdapter, self).send(request, *args, **kwargs)
 
 
 class SafeUpgradeHTTPSAdapter(ForceHTTPSAdapter):
@@ -377,4 +350,4 @@ class SafeUpgradeHTTPSAdapter(ForceHTTPSAdapter):
 
         request.url = "http://" + request.url[8:]
         # Note: skipping base classes including ForceHTTPSAdapter
-        return super(ForceHTTPSAdapter, self).send(request, *args, **kwargs)
+        return super(RedirectAdapter, self).send(request, *args, **kwargs)
