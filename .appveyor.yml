@@ -7,7 +7,7 @@ environment:
     - TOXENV: py34
       COV_FAIL_UNDER: 65
     - TOXENV: py27
-      COV_FAIL_UNDER: 65
+      COV_FAIL_UNDER: 60
 install:
   - pip install tox codecov
 build: false
