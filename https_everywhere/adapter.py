@@ -20,17 +20,58 @@ if PY2:
     str = "".__class__
 
 _REASON = "HTTPS Everywhere"
+_HTTP_BLOCK_CODE = 406
 logger = setup_logger(name="httpseverwhere.adapter", level=logging.INFO)
 
 
-def _generate_redirect(location, code=302):
+def _generate_response(code=200, reason=None, headers=None):
     r = requests.Response()
-    r.headers["Location"] = location
     r.encoding = "utf8"
     r.status_code = code
-    r.reason = _REASON
+    r.reason = reason or _REASON
     r._content = ""
+
+    if headers:
+        r.headers.update(headers)
     return r
+
+
+def _generate_redirect(location, code=302):
+    return _generate_response(code=code, headers={"Location": location})
+
+
+class BlockAdapter(HTTPAdapter):
+
+    block_code = 500
+
+    def send_block(self, request, status_code=None, *args, **kwargs):
+        response = _generate_response(status_code or self.block_code)
+        response.url = request.url
+        response.request = request
+        return response
+
+
+class BlockCodeAdapter(BlockAdapter):
+
+    block_code = _HTTP_BLOCK_CODE
+
+
+class HTTPBlockAdapter(BlockCodeAdapter):
+    def send(self, request, *args, **kwargs):
+        if request.url.startswith("http:"):
+            return self.send_block(request, *args, **kwargs)
+
+        return super(HTTPBlockAdapter, self).send(request, *args, **kwargs)
+
+
+class HTTPRedirectBlockAdapter(BlockCodeAdapter):
+    def send(self, request, *args, **kwargs):
+        response = super(HTTPRedirectBlockAdapter, self).send(request, *args, **kwargs)
+        if response.is_redirect:
+            target = response.headers["location"]
+            if target.startswith("http:"):
+                return self.send_block(request, *args, **kwargs)
+        return response
 
 
 class HTTPSEverywhereOnlyAdapter(HTTPAdapter):

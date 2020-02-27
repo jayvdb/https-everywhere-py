@@ -5,6 +5,8 @@ import unittest
 import requests
 
 from https_everywhere.adapter import (
+    HTTPBlockAdapter,
+    HTTPRedirectBlockAdapter,
     HTTPSEverywhereOnlyAdapter,
     ChromePreloadHSTSAdapter,
     HTTPSEverywhereAdapter,
@@ -13,11 +15,56 @@ from https_everywhere.adapter import (
     UpgradeHTTPSAdapter,
     SafeUpgradeHTTPSAdapter,
     _REASON,
+    _HTTP_BLOCK_CODE,
 )
 
 # Throughout _test_modwsgi_org refers to a scenario where the website
 # has been fixed, an a similar scenario has not yet been found
 # It may need to be mocked.
+
+
+class TestBlockAdapter(unittest.TestCase):
+
+    cls = HTTPBlockAdapter
+
+    def test_freerangekitten_com(self):
+        url = "http://freerangekitten.com/"
+        s = requests.Session()
+        self.assertEqual(len(s.adapters), 2)
+        s.mount("http://", self.cls())
+        self.assertEqual(len(s.adapters), 2)
+        self.assertEqual(
+            s.adapters["https://"].__class__, requests.adapters.HTTPAdapter
+        )
+        self.assertEqual(s.adapters["http://"].__class__, self.cls)
+        r = s.get(url)
+        self.assertEqual(r.url, url)
+        self.assertEqual(r.history, [])
+        self.assertEqual(r.status_code, _HTTP_BLOCK_CODE)
+
+        url = "https://freerangekitten.com/"
+        s.mount("https://", self.cls())
+        r = s.get(url)
+        self.assertEqual(r.url, url)
+        self.assertEqual(r.status_code, 200)
+
+
+class TestRedirectBlockAdapter(unittest.TestCase):
+
+    cls = HTTPRedirectBlockAdapter
+
+    def test_whisper_sh(self):
+        url = "https://whisper.sh/"
+        s = requests.Session()
+        self.assertEqual(len(s.adapters), 2)
+        s.mount("https://", self.cls())
+        self.assertEqual(len(s.adapters), 2)
+        self.assertEqual(s.adapters["http://"].__class__, requests.adapters.HTTPAdapter)
+        self.assertEqual(s.adapters["https://"].__class__, self.cls)
+        r = s.get(url)
+        self.assertEqual(r.url, url)
+        self.assertEqual(r.history, [])
+        self.assertEqual(r.status_code, _HTTP_BLOCK_CODE)
 
 
 class TestEverywhereOnlyAdapter(unittest.TestCase):
