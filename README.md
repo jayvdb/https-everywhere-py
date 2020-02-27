@@ -1,6 +1,10 @@
 # https-everywhere : Privacy for Pythons
 
-This project primarily provides requests adapters for Chrome [HSTS Preload](http://hstspreload.org/) and [HTTPS Everywhere](https://github.com/EFForg/https-everywhere) rulesets.
+![Codecov](https://img.shields.io/codecov/c/gh/jayvdb/https-everywhere-py)
+![AppVeyor CI](https://img.shields.io/appveyor/build/jayvdb/https-everywhere-py)
+![Cirrus CI](https://img.shields.io/cirrus/github/jayvdb/https-everywhere-py)
+
+This project primarily provides [requests](https://github.com/psf/requests/) adapters for Chrome [HSTS Preload](http://hstspreload.org/) and [HTTPS Everywhere](https://github.com/EFForg/https-everywhere) rulesets.
 
 At this stage, the focus is on correct efficient loading of the approx 25,000 rulesets of HTTPS Everywhere for use with any requests.
 Emphasis is on converting those rulesets to simpler or more common rules to reduce memory requirements.
