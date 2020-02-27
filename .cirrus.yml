@@ -21,6 +21,7 @@ Linux_task:
   script:
     - python --version
     - PY=$(python3 -c 'import sys; print("%d%d" % (sys.version_info[0], sys.version_info[1]))')
+    - if [[ $PY == 34 ]]; then export COV_FAIL_UNDER=65; fi
     - python -m tox -e py$PY
     - bash <(curl -s https://codecov.io/bash)
 
