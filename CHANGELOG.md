@@ -6,10 +6,10 @@
 
 **Closed issues:**
 
+- Make `sre_yield` dependency optional [\#3](https://github.com/jayvdb/https-everywhere-py/issues/3)
+- Add Python 2.7 support [\#20](https://github.com/jayvdb/https-everywhere-py/issues/20)
+- Add Python 3.8 support [\#15](https://github.com/jayvdb/https-everywhere-py/issues/15)
 - Add Cirrus CI [\#21](https://github.com/jayvdb/https-everywhere-py/issues/21)
-- Python 2.7 [\#20](https://github.com/jayvdb/https-everywhere-py/issues/20)
-- Python 3.8 [\#15](https://github.com/jayvdb/https-everywhere-py/issues/15)
-- sre\_yield dep [\#3](https://github.com/jayvdb/https-everywhere-py/issues/3)
 - Add AppVeyor CI [\#1](https://github.com/jayvdb/https-everywhere-py/issues/1)
 
 ## [0.2.0](https://github.com/jayvdb/https-everywhere-py/tree/0.2.0) (2020-02-25)
