@@ -124,10 +124,9 @@ class RedirectAdapter(HTTPAdapter):
 
     def handle_error(self, exc, request=None):
         logger.error(
-            "handle_error {}.{}: {}",
-            exc.__class__.__module__,
-            exc.__class__.__name__,
-            exc,
+            "handle_error {}.{}: {}".format(
+                exc.__class__.__module__, exc.__class__.__name__, exc
+            )
         )
         raise exc
 
