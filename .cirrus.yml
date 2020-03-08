@@ -20,7 +20,8 @@ Linux_task:
     - mv https-everywhere ..
   script:
     - python --version
-    - PY=$(python3 -c 'import sys; print("%d%d" % (sys.version_info[0], sys.version_info[1]))')
+    - PY=$(python -c 'import sys; print("%d%d" % (sys.version_info[0], sys.version_info[1]))')
+    - if [[ $PY == 27 ]]; then export COV_FAIL_UNDER=60; fi
     - if [[ $PY == 34 ]]; then export COV_FAIL_UNDER=65; fi
     - python -m tox -e py$PY
     - bash <(curl -s https://codecov.io/bash)
