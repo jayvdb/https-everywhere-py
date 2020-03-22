@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import re
+from timeit import default_timer as timer
 
 from cached_property import cached_property
 from logging_helper import setup_logging
@@ -470,18 +471,22 @@ def _reduce_ruleset(ruleset):
     return True
 
 
-def _reduce_rules(rulesets, check=False):
+def _reduce_rules(rulesets, check=False, simplify=False):
     if isinstance(rulesets, dict):
         rulesets = rulesets["rulesets"]
 
-    if check and not expand_pattern:
+    if (check or simplify) and not expand_pattern:
         logger.warning("Rule analysis and simplification only supported on Python 3")
-        check = False
+        check = simplify = False
 
     mapping = {}
     domains = set()
     prefix_targets = set()
     suffix_targets = set()
+    simplifications_performed = 0
+
+    logger.info("Importing HTTPSEverywhere rules")
+    start = timer()
 
     for ruleset in rulesets:
         orig_ruleset = ruleset.copy()
@@ -636,9 +641,11 @@ def _reduce_rules(rulesets, check=False):
         # Discard common data
         if rules == ONLY_FORCE_HTTPS_RULE_IN:
             rules = ONLY_FORCE_HTTPS_RULE_COMPILED
+            ruleset = rules, exclusions
 
-        else:
+        elif simplify:
             reduced_rules = []
+            original_rule_count = len(rules)
             for item in rules:
                 from_ = item["from"]
                 if from_ in _FIXME_REJECT_PATTERNS:
@@ -659,12 +666,17 @@ def _reduce_rules(rulesets, check=False):
             if rules[-1] == FORCE_HTTPS_RULE:
                 rules[-1] = FORCE_HTTPS_RULE_COMPILED
 
-        reduced_ruleset = _Ruleset(rules, exclusions, targets)
+            reduced_ruleset = _Ruleset(rules, exclusions, targets)
 
-        if check:
             _reduce_ruleset(reduced_ruleset)
+            final_rule_count = len(reduced_ruleset._rules)
+            simplifications_performed += final_rule_count
 
-        ruleset = (reduced_ruleset._rules, reduced_ruleset._exclusions)
+            ruleset = (reduced_ruleset._rules, reduced_ruleset._exclusions)
+
+        else:
+            rules = [(item["from"], item["to"]) for item in rules]
+            ruleset = rules, exclusions
 
         if ruleset == ONLY_FORCE_HTTPS_RULE_COMPILED_NO_EXCEPTIONS:
             ruleset = ONLY_FORCE_HTTPS_RULE_COMPILED_NO_EXCEPTIONS
@@ -672,7 +684,8 @@ def _reduce_rules(rulesets, check=False):
         for target in targets:
             # https://github.com/EFForg/https-everywhere/issues/18897
             if (
-                name == "Vox Media.com (resources)"
+                check
+                and name == "Vox Media.com (resources)"
                 and target
                 in [
                     "voxmedia.com",
@@ -712,6 +725,17 @@ def _reduce_rules(rulesets, check=False):
         # TODO: re-enable or remove when new published ruleset is fixed
         # assert sorted(overlapping_prefixes) == _FIXME_MULTIPLE_RULEST_PREFIXES, sorted(overlapping_prefixes)
 
+    end = timer()
+    elapsed = end - start
+    simplifications_message = "; {} non-trivial simplifications".format(
+        simplifications_performed
+    )
+    logger.info(
+        "Finished importing HTTPSEverywhere rules after {:.2f}s{}".format(
+            elapsed, simplifications_message if simplifications_performed else ""
+        )
+    )
+
     return mapping
 
 
@@ -750,7 +774,7 @@ def _get_rulesets():
     global _DATA
     if not _DATA:
         data = fetch_update()
-        _DATA = _reduce_rules(data)
+        _DATA = _reduce_rules(data, simplify=True)
     return _DATA
 
 

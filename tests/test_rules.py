@@ -19,11 +19,16 @@ project_root = os.path.join(os.path.dirname(__file__), "..")
 https_everything_project = os.path.join(project_root, "..", "https-everywhere")
 
 if not os.path.exists(https_everything_project):
-    raise unittest.SkipTest("Clone https-everywhere beside https-everywhere-py to run rule tests")
+    raise unittest.SkipTest(
+        "Clone https-everywhere beside https-everywhere-py to run rule tests"
+    )
 
-https_everywhere_checker_root = os.path.join(https_everything_project, "test", "rules", "src")
+https_everywhere_checker_root = os.path.join(
+    https_everything_project, "test", "rules", "src"
+)
 https_everywhere_checker_root_init = os.path.join(
-    https_everywhere_checker_root, "https_everywhere_checker", "__init__.py")
+    https_everywhere_checker_root, "https_everywhere_checker", "__init__.py"
+)
 
 if not os.path.exists(https_everywhere_checker_root_init):
     with open(https_everywhere_checker_root_init, "w") as f:
@@ -37,7 +42,9 @@ try:
 except ImportError as e:
     raise unittest.SkipTest("https_everywhere_checker not importable: {}".format(e))
 
-rules_path = os.path.join(https_everything_project, *("src/chrome/content/rules".split("/")))
+rules_path = os.path.join(
+    https_everything_project, *("src/chrome/content/rules".split("/"))
+)
 ruleset_file = os.path.join(rules_path, "default.rulesets")
 
 if not os.path.exists(ruleset_file):
@@ -77,7 +84,9 @@ def _load_upstream_reduced_rulesets():
 
     with open(ruleset_file) as f:
         _upstream_data = json.load(f)
-        _upstream_reduced = _reduce_rules(_upstream_data, check=_run_check)
+        _upstream_reduced = _reduce_rules(
+            _upstream_data, check=_run_check, simplify=True
+        )
         return _upstream_reduced
 
 
