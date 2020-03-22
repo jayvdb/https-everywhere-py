@@ -23,12 +23,31 @@ class TestPreload(unittest.TestCase):
         self.assertFalse(_check_in(domains, "business2.medbank.com.mt"))
         self.assertFalse(_check_in(domains, "foo.business2.medbank.com.mt"))
 
+    def test_require_force_https(self):
+        domains = _preload_including_subdomains()
         self.assertTrue(_check_in(domains, "pinning-test.badssl.com"))
         self.assertTrue(_check_in(domains, "foo.pinning-test.badssl.com"))
         self.assertFalse(_check_in(domains, "foo.pinning-test2.badssl.com"))
         self.assertFalse(_check_in(domains, "pinning-test2.badssl.com"))
 
-    def test_include_subdomains(self):
+        domains = _preload_including_subdomains(require_force_https=True)
+        self.assertFalse(_check_in(domains, "pinning-test.badssl.com"))
+        self.assertFalse(_check_in(domains, "foo.pinning-test.badssl.com"))
+
+    def test_doubleclick(self):
+        domains = _preload_including_subdomains()
+        self.assertIn("stats.g.doubleclick.net", domains)
+
+    def test_no_include_subdomains(self):
         domains = _preload_including_subdomains()
         self.assertIn("pinningtest.appspot.com", domains)
         self.assertNotIn("at.search.yahoo.com", domains)
+
+        domains = _preload_including_subdomains(require_force_https=True)
+        self.assertNotIn("pinningtest.appspot.com", domains)
+
+    def test_remove_overlap(self):
+        domains = _preload_including_subdomains(
+            remove_overlap=True, overlap_order_check=True
+        )
+        self.assertNotIn("www.apollo-auto.com", domains)

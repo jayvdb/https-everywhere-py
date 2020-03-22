@@ -7,6 +7,7 @@ import requests
 from logging_helper import setup_logging
 
 from ._fetch import _storage_location
+from ._util import _check_in
 
 logger = setup_logging()
 
@@ -34,39 +35,116 @@ def _load_preload_data(filename):
         return data
 
 
-def _preload_including_subdomains():
+def _preload_including_subdomains(
+    remove_overlap=False, require_force_https=False, overlap_order_check=False
+):
     filename = _fetch_preload()
     data = _load_preload_data(filename)
     data = data["entries"]
     domains = set()
+    entries = {}
+    overlap_entries = {"googlegroups.com", "dropbox.com", "appspot.com"}
 
     for entry in data:
         name = entry["name"]
+        if remove_overlap:
+            assert name not in entries
+            entries[name] = entry
+
         if "." not in name:
             continue
+
+        mode = entry.get("mode")
+        force_https = mode == "force-https"
+        if force_https:
+            pass
+        elif not mode:
+            assert entry.get("expect_ct") or entry.get("pins")
+            if require_force_https:
+                continue
+        else:
+            raise AssertionError("Unknown mode {}".format(mode))
+
         includeSubdomains = entry.get("include_subdomains")
+
         if not includeSubdomains:
+            logger.info(
+                "{}: Ignoring !include_subdomains entry: {!r}".format(name, entry)
+            )
             continue
 
-        pos = name.rfind(".", 1)
-        pos = name.rfind(".", 1, pos)
-        if pos != -1:
-            check_domain = name[pos + 1 :]
-            if check_domain in domains:
-                logger.debug(
-                    "{} base {} already in the list".format(name, check_domain)
-                )
+        if remove_overlap and overlap_order_check:
+            base = _check_in(domains, name)
+            if base:
+                if base in overlap_entries:
+                    func = logger.info if base == "appspot.com" else logger.warning
+                    func(
+                        "{}: covered by prior rule {}\n{!r}\n{!r}".format(
+                            name, base, entry, entries[base]
+                        )
+                    )
+                else:
+                    logger.error(
+                        "Unexpected {} base {} already seen; please raise an issue: {!r}".format(
+                            name, base, entry
+                        )
+                    )
                 continue
 
         parts = name.split(".")
-        if name in ["stats.g.doubleclick.net"]:
-            continue
         if parts[-2:] == ["google", "com"]:
+            logger.info("Ignoring google.com {}: {!r}".format(name, entry))
             continue
-        assert len(parts) < 5, "{} ({}) is very long and {} not found".format(
-            name, parts[-2:], check_domain
-        )
+
+        assert (
+            len(parts) < 5
+        ), "{} ({}) has too many parts for _check_in to work".format(name, parts[-2:])
 
         domains.add(name)
+
+    if remove_overlap:
+        reverse_dotted = []
+        for item in entries:
+            reversed_item = tuple(reversed(item.split(".")))
+            reverse_dotted.append(reversed_item)
+
+        previous = ""
+        for item in sorted(reverse_dotted):
+            item = ".".join(reversed(item))
+
+            if not previous or "." + previous + "." not in "." + item + ".":
+                previous = item
+                continue
+
+            if previous in "appspot.com":
+                # https://bugs.chromium.org/p/chromium/issues/detail?id=568378
+                if item in domains:
+                    domains.remove(item)
+                continue
+
+            if not entries[previous].get("include_subdomains"):
+                continue
+            if not entries[item].get("include_subdomains"):
+                continue
+            if (
+                entries[item].get("mode") != "force-https"
+                or entries[previous].get("mode") != "force-https"
+            ):
+                continue
+            if entries[item].get("pins") and entries[previous].get("pins") != entries[
+                item
+            ].get("pins"):
+                continue
+
+            func = logger.info if previous in overlap_entries else logger.warning
+            func(
+                "{}: covered by latter rule {}: (first only; log level info may show more)\n{!r}\n{!r}".format(
+                    item, previous, entries[item], entries[previous]
+                )
+            )
+            overlap_entries.add(item)
+            overlap_entries.add(previous)
+            if item in domains:
+                domains.remove(item)
 
     return domains
