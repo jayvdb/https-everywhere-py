@@ -1,3 +1,14 @@
+__all__ = ["_reverse_host", "_check_in"]
+
+
+def _reverse_host(host, trailing_dot=True):
+    rv = ".".join(reversed(host.split(".")))
+    if trailing_dot:
+        return rv + "."
+    else:
+        return rv
+
+
 def _check_in(domains, hostname):
     if hostname in domains:
         return True
