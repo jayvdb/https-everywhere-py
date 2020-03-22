@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-import logging
+from logging_helper import setup_logging
 
 import urllib3
 from urllib3.util.url import parse_url
@@ -13,15 +13,13 @@ from ._rules import https_url_rewrite, _get_rulesets
 from ._chrome_preload_hsts import _preload_including_subdomains
 from ._util import _check_in
 
-from logzero import setup_logger
-
 PY2 = str != "".__class__
 if PY2:
     str = "".__class__
 
 _REASON = "HTTPS Everywhere"
 _HTTP_BLOCK_CODE = 406
-logger = setup_logger(name="httpseverwhere.adapter", level=logging.INFO)
+logger = setup_logging()
 
 
 def _generate_response(code=200, reason=None, headers=None):

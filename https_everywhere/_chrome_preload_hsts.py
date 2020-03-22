@@ -4,11 +4,11 @@ import os.path
 
 import requests
 
-from logzero import setup_logger
+from logging_helper import setup_logging
 
 from ._fetch import _storage_location
 
-logger = setup_logger(name="httpseverwhere.preload", level=logging.INFO)
+logger = setup_logging()
 
 _github_url = "https://raw.githubusercontent.com/chromium/chromium/master/net/http/transport_security_state_static.json"
 

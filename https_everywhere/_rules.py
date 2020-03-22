@@ -1,10 +1,9 @@
 from __future__ import unicode_literals
 
 import re
-import logging
 
-from logzero import setup_logger
 from cached_property import cached_property
+from logging_helper import setup_logging
 from urllib3.util.url import parse_url as urlparse
 
 from ._fetch import fetch_update
@@ -23,7 +22,7 @@ try:
 except ImportError:
     expand_pattern, ExpansionError = None, None
 
-logger = setup_logger(name="httpseverywhere.rules", level=logging.INFO)
+logger = setup_logging()
 
 PY2 = str != "".__class__
 if PY2:

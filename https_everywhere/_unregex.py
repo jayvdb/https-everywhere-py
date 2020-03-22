@@ -1,12 +1,11 @@
 import sre_parse
-import logging
+
+from logging_helper import setup_logging
 
 import urllib3
 from urllib3.util.url import parse_url as urlparse
 
 import sre_yield
-
-from logzero import setup_logger
 
 from ._fixme import (
     _FIXME_SUBDOMAIN_PREFIXES,
@@ -14,7 +13,7 @@ from ._fixme import (
     _FIXME_EXTRA_REPLACEMENTS,
 )
 
-logger = setup_logger(name="httpseverwhere.unregex", level=logging.INFO)
+logger = setup_logging()
 valid_host_char = set(
     "ABCDEFGHIJKMLNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz09123456789.-*"
 )

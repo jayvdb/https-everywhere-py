@@ -55,7 +55,7 @@ setup(
     install_requires=[
         "requests[security]",
         "appdirs",
-        "logzero",
+        "logging-helper",
         "cached-property",
     ],
     classifiers=classifiers.splitlines(),
