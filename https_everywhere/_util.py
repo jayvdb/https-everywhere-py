@@ -10,10 +10,16 @@ def _reverse_host(host, trailing_dot=True):
 
 
 def _check_in(domains, hostname):
-    if hostname in domains:
-        return True
-
     parts = hostname.split(".")
+    # Single label names are invalid
+    if len(parts) == 1:
+        return
+
+    if hostname in domains:
+        return hostname
+
+    if parts[-1] in domains:
+        return parts[-1]
 
     if len(parts) > 2:
         subdomain_rule = "{}.{}".format(parts[-2], parts[-1])

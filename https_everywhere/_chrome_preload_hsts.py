@@ -52,9 +52,6 @@ def _preload_including_subdomains(
             assert reversed_name not in entries
             entries[reversed_name] = entry
 
-        if "." not in name:
-            continue
-
         mode = entry.get("mode")
         force_https = mode == "force-https"
         if force_https:
@@ -93,10 +90,6 @@ def _preload_including_subdomains(
                 continue
 
         parts = name.split(".")
-        if parts[-2:] == ["google", "com"]:
-            logger.info("Ignoring google.com {}: {!r}".format(name, entry))
-            continue
-
         assert (
             len(parts) < 5
         ), "{} ({}) has too many parts for _check_in to work".format(name, parts[-2:])
