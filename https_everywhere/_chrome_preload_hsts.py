@@ -7,7 +7,7 @@ import requests
 from logging_helper import setup_logging
 
 from ._fetch import _storage_location
-from ._util import _check_in
+from ._util import _check_in, _reverse_host
 
 logger = setup_logging()
 
@@ -48,8 +48,9 @@ def _preload_including_subdomains(
     for entry in data:
         name = entry["name"]
         if remove_overlap:
-            assert name not in entries
-            entries[name] = entry
+            reversed_name = _reverse_host(name)
+            assert reversed_name not in entries
+            entries[reversed_name] = entry
 
         if "." not in name:
             continue
@@ -80,7 +81,7 @@ def _preload_including_subdomains(
                     func = logger.info if base == "appspot.com" else logger.warning
                     func(
                         "{}: covered by prior rule {}\n{!r}\n{!r}".format(
-                            name, base, entry, entries[base]
+                            name, base, entry, entries[_reverse_host(base)]
                         )
                     )
                 else:
@@ -103,48 +104,43 @@ def _preload_including_subdomains(
         domains.add(name)
 
     if remove_overlap:
-        reverse_dotted = []
-        for item in entries:
-            reversed_item = tuple(reversed(item.split(".")))
-            reverse_dotted.append(reversed_item)
-
         previous = ""
-        for item in sorted(reverse_dotted):
-            item = ".".join(reversed(item))
-
-            if not previous or "." + previous + "." not in "." + item + ".":
+        previous_data = None
+        for item in sorted(entries.keys()):
+            entry = entries[item]
+            if not previous or previous not in item:
                 previous = item
+                previous_entry = entry
                 continue
 
-            if previous in "appspot.com":
+            name = entry["name"]
+            if previous.startswith("com.appspot."):
                 # https://bugs.chromium.org/p/chromium/issues/detail?id=568378
-                if item in domains:
-                    domains.remove(item)
+                if name in domains:
+                    domains.remove(name)
                 continue
 
-            if not entries[previous].get("include_subdomains"):
+            if not previous_entry.get("include_subdomains"):
                 continue
-            if not entries[item].get("include_subdomains"):
+            if not entry.get("include_subdomains"):
                 continue
             if (
-                entries[item].get("mode") != "force-https"
-                or entries[previous].get("mode") != "force-https"
+                entry.get("mode") != "force-https"
+                or previous_entry.get("mode") != "force-https"
             ):
                 continue
-            if entries[item].get("pins") and entries[previous].get("pins") != entries[
-                item
-            ].get("pins"):
+            if entry.get("pins") and entry["pins"] != previous_entry.get("pins"):
                 continue
 
             func = logger.info if previous in overlap_entries else logger.warning
             func(
                 "{}: covered by latter rule {}: (first only; log level info may show more)\n{!r}\n{!r}".format(
-                    item, previous, entries[item], entries[previous]
+                    name, previous_entry["name"], entry, previous_entry
                 )
             )
             overlap_entries.add(item)
             overlap_entries.add(previous)
-            if item in domains:
-                domains.remove(item)
+            if name in domains:
+                domains.remove(name)
 
     return domains
