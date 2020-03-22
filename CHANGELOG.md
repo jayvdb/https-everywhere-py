@@ -1,7 +1,25 @@
 # Change Log
 
-## v0.2.1
+## [0.2.2](https://github.com/jayvdb/https-everywhere-py/tree/0.2.2) (2020-03-23)
 
+[Full Changelog](https://github.com/jayvdb/https-everywhere-py/compare/0.2.1...0.2.2)
+
+**Implemented enhancements:**
+
+- Add recipe for blocking HTTP [\#33](https://github.com/jayvdb/https-everywhere-py/issues/33)
+- Switched from `logzero` to `logging-helper` [\#24](https://github.com/jayvdb/https-everywhere-py/issues/24)
+
+**Fixed bugs:**
+
+- Parse HSTS Google entries [\#10](https://github.com/jayvdb/https-everywhere-py/issues/10)
+
+**Closed issues:**
+
+- Cirrus py27 is running Python 3.7 [\#34](https://github.com/jayvdb/https-everywhere-py/issues/34)
+- Send coverage to codecov.io [\#26](https://github.com/jayvdb/https-everywhere-py/issues/26)
+- Log start and end of rule simplification process [\#4](https://github.com/jayvdb/https-everywhere-py/issues/4)
+
+## [0.2.1](https://github.com/jayvdb/https-everywhere-py/tree/0.2.1) (2020-02-27)
 [Full Changelog](https://github.com/jayvdb/https-everywhere-py/compare/0.2.0...0.2.1)
 
 **Closed issues:**
