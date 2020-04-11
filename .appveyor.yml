@@ -14,6 +14,6 @@ build: false
 test_script:
   - git clone --depth 1 https://github.com/EFForg/https-everywhere
   - mv https-everywhere ..
-  - tox
+  - tox -- -k 'not fedmsg'
   - codecov
 skip_branch_with_pr: true
