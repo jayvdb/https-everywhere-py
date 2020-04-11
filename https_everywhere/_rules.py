@@ -398,12 +398,16 @@ def _reduce_ruleset(ruleset):
                         continue
 
                     if pattern_target in _FIXME_BROKEN_REGEX_MATCHES:
-                        logger.warning(
-                            "host {} is used in regex and doesnt appear in targets {}; discarding invalid rule".format(
-                                pattern_target, targets
+                        discard = len(pattern_targets) == 1 and not pattern_target.endswith(".*")
+                        logger.error(
+                            "host {} is used in regex and doesnt appear in targets {}; {}".format(
+                                pattern_target, targets,
+                                "discarding invalid rule" if discard else "should be discarded",
                             )
                         )
-                        # TODO: really discard it
+                        if discard:
+                            ruleset._rules = []
+                            return True
                         return
 
                     if middle_star_exists:
@@ -669,6 +673,9 @@ def _reduce_rules(rulesets, check=False, simplify=False):
             reduced_ruleset = _Ruleset(rules, exclusions, targets)
 
             _reduce_ruleset(reduced_ruleset)
+            if not reduced_ruleset._rules:
+                continue
+
             final_rule_count = len(reduced_ruleset._rules)
             simplifications_performed += final_rule_count
 
