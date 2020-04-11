@@ -1,9 +1,6 @@
 environment:
   matrix:
-    - TOXENV: py38
-    - TOXENV: py37
-    - TOXENV: py36
-    - TOXENV: py35
+    - TOXENV: py38,py37,py36,py35
     - TOXENV: py34
       COV_FAIL_UNDER: 65
     - TOXENV: py27
