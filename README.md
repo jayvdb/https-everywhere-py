@@ -52,6 +52,7 @@ Adapters can be mounted on 'http://', or a narrower mount point.
 * HTTPRedirectBlockAdapter - Mount on 'https://' to block HTTPS responses redirecting to HTTP
 * HTTPSEverywhereOnlyAdapter - Apply HTTPS Everywhere rules
 * ChromePreloadHSTSAdapter - Upgrade to HTTPS for sites on Chrome preload list
+* MozillaPreloadHSTSAdapter - Upgrade to HTTPS for sites on Mozilla preload list
 * HTTPSEverywhereAdapter - Chrome preload hsts and https everywhere rules combined
 * ForceHTTPSAdapter - Just use HTTPS, always, everywhere
 * PreferHTTPSAdapter - Check HTTP if there are any redirects, before switching to HTTPS.

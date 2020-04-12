@@ -9,6 +9,7 @@ from https_everywhere.adapter import (
     HTTPRedirectBlockAdapter,
     HTTPSEverywhereOnlyAdapter,
     ChromePreloadHSTSAdapter,
+    MozillaPreloadHSTSAdapter,
     HTTPSEverywhereAdapter,
     ForceHTTPSAdapter,
     PreferHTTPSAdapter,
@@ -259,6 +260,12 @@ class TestChromePreloadAdapter(TestEverywhereOnlyAdapter):
         self.assertEqual(r.history[1].url, url.replace("http://", "https://"))
         self.assertEqual(r.history[1].status_code, 301)
         self.assertEqual(r.history[1].reason, "Moved Permanently")
+
+
+class TestMozillaPreloadAdapter(TestChromePreloadAdapter):
+    cls = MozillaPreloadHSTSAdapter
+
+    test_medbank_mt = TestEverywhereOnlyAdapter.test_medbank_mt
 
 
 class TestEverywhereAdapter(TestChromePreloadAdapter):

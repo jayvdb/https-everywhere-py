@@ -1,5 +1,4 @@
 import json
-import logging
 import os.path
 
 import requests
@@ -15,11 +14,12 @@ _github_url = "https://raw.githubusercontent.com/chromium/chromium/master/net/ht
 
 
 def _fetch_preload():
-    filename = _storage_location("transport_security_state_static.json")
+    filename = _storage_location(_github_url)
     if os.path.exists(filename):
         return filename
 
     r = requests.get(_github_url)
+    r.raise_for_status()
 
     with open(filename, "w") as f:
         f.write(r.text)

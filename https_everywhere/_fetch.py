@@ -21,10 +21,13 @@ def _storage_location(filename=None, timestamp=None):
         except (IOError, OSError):
             pass
 
-    if timestamp:
-        filename = "default.rulesets.{}".format(timestamp)
-
     if filename:
+        if "/" in filename:
+            filename = os.path.basename(filename)
+
+        if timestamp:
+            filename = "{}.{}".format(filename, timestamp)
+
         return os.path.join(cache_dir, filename)
 
     return cache_dir
@@ -48,7 +51,7 @@ def _get_local_ts():
 def _get_local(timestamp=None):
     if not timestamp:
         timestamp = _get_local_ts()  # pragma: no cover
-    location = _storage_location(timestamp=timestamp)
+    location = _storage_location("default.rulesets", timestamp)
     if os.path.exists(location):
         with open(location) as f:
             return json.load(f)
@@ -68,7 +71,7 @@ def fetch_update(timestamp=None):
         ruleset_url, headers={"Accept-Encoding": "gzip, deflate, br"}, stream=True
     )
     r.raise_for_status()
-    location = _storage_location(timestamp=timestamp)
+    location = _storage_location("default.rulesets", timestamp)
     try:
         data = gzip.GzipFile(fileobj=r.raw).read()
     except Exception:

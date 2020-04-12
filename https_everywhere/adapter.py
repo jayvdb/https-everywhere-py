@@ -11,6 +11,7 @@ from requests.packages.urllib3.util.timeout import Timeout
 
 from ._rules import https_url_rewrite, _get_rulesets
 from ._chrome_preload_hsts import _preload_including_subdomains
+from ._mozilla_preload_hsts import _preload_remove_negative
 from ._util import _check_in
 
 PY2 = str != "".__class__
@@ -146,11 +147,11 @@ class HTTPSEverywhereOnlyAdapter(RedirectAdapter):
         return super(HTTPSEverywhereOnlyAdapter, self).get_redirect(url)
 
 
-class ChromePreloadHSTSAdapter(RedirectAdapter):
+class PreloadHSTSAdapter(RedirectAdapter):
     def __init__(self, *args, **kwargs):
-        super(ChromePreloadHSTSAdapter, self).__init__(*args, **kwargs)
+        super(PreloadHSTSAdapter, self).__init__(*args, **kwargs)
         # prime cache
-        self._domains = _preload_including_subdomains()
+        self._domains = self._get_preload()
 
     def get_redirect(self, url):
         if url.startswith("http://"):
@@ -159,7 +160,15 @@ class ChromePreloadHSTSAdapter(RedirectAdapter):
                 new_url = "https:" + url[5:]
                 return new_url
 
-        return super(ChromePreloadHSTSAdapter, self).get_redirect(url)
+        return super(PreloadHSTSAdapter, self).get_redirect(url)
+
+
+class ChromePreloadHSTSAdapter(PreloadHSTSAdapter):
+    _get_preload = _preload_including_subdomains
+
+
+class MozillaPreloadHSTSAdapter(PreloadHSTSAdapter):
+    _get_preload = _preload_remove_negative
 
 
 class HTTPSEverywhereAdapter(ChromePreloadHSTSAdapter, HTTPSEverywhereOnlyAdapter):
