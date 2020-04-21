@@ -275,8 +275,8 @@ class TestForceAdapter(TestEverywhereAdapter):
         with self.assertRaises(requests.exceptions.TooManyRedirects):
             s.get(url)
 
-        s.mount("http://", ForceHTTPSAdapter(https_exclusions=["fedmsg.com"]))
-        s.mount("https://", ForceHTTPSAdapter(https_exclusions=["fedmsg.com"]))
+        s.mount("http://", self.cls(https_exclusions=["fedmsg.com"]))
+        s.mount("https://", self.cls(https_exclusions=["fedmsg.com"]))
 
         r = s.get(url)
         r.raise_for_status()
