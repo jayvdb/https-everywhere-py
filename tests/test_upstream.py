@@ -44,7 +44,7 @@ class TestUpstreamAdapter(unittest.TestCase):
         url = "http://fedmsg.com/"
         s = requests.Session()
         s.mount("http://", self.cls())
-        r = s.get(url)
+        r = s.get(url, timeout=60)
         r.raise_for_status()
         self.assertEqual(r.url, url)
         self.assertEqual(r.history, [])

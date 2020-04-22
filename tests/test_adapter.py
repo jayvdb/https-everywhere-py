@@ -273,7 +273,7 @@ class TestForceAdapter(TestEverywhereAdapter):
         s = requests.Session()
         s.mount("http://", self.cls())
         with self.assertRaises(requests.exceptions.TooManyRedirects):
-            s.get(url)
+            s.get(url, timeout=60)
 
         s.mount("http://", self.cls(https_exclusions=["fedmsg.com"]))
         s.mount("https://", self.cls(https_exclusions=["fedmsg.com"]))
