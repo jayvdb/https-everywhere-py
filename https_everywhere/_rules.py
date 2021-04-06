@@ -4,9 +4,9 @@ import re
 from timeit import default_timer as timer
 
 from cached_property import cached_property
-from logging_helper import setup_logging
 from urllib3.util.url import parse_url as urlparse
 
+from .logging import setup_logging
 from ._fetch import fetch_update
 from ._fixme import (
     # _FIXME_MULTIPLE_RULEST_PREFIXES,

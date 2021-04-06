@@ -1,7 +1,5 @@
 from __future__ import unicode_literals
 
-from logging_helper import setup_logging
-
 import urllib3
 from urllib3.util.url import parse_url
 
@@ -9,6 +7,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.timeout import Timeout
 
+from .logging import setup_logging
 from ._rules import https_url_rewrite, _get_rulesets
 from ._chrome_preload_hsts import _preload_including_subdomains
 from ._mozilla_preload_hsts import _preload_remove_negative
