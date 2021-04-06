@@ -238,15 +238,15 @@ def _is_rule_only_force_https(ruleset, rule):
                         )
                     )
                     return False
-                else:
-                    # There are five of these, and the pattern and replacement have the same path, so can easily be
-                    # reduced by adding an exclusion as inverse regex of the path in the rule
-                    logger.info(
-                        "{} matches {} but has a path, and is not reducible yet".format(
-                            targets, rule.pattern
-                        )
+
+                # There are five of these, and the pattern and replacement have the same path, so can easily be
+                # reduced by adding an exclusion as inverse regex of the path in the rule
+                logger.info(
+                    "{} matches {} but has a path, and is not reducible yet".format(
+                        targets, rule.pattern
                     )
-                    return False
+                )
+                return False
             else:  # pragma: no cover
                 logger.debug("{} not matches targets {}".format(rule.pattern, targets))
                 assert rule.pattern_targets[0] in targets
@@ -444,7 +444,7 @@ def _reduce_ruleset(ruleset):
                     # ~500 cases
                     ruleset._rules = REMOVE_WWW_and_FORCE_HTTPS_RULES
                     return True
-                elif rule.add_www:
+                if rule.add_www:
                     # ~1100 cases
                     ruleset._rules = ADD_WWW_and_FORCE_HTTPS_RULES
                     return True

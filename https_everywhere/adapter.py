@@ -254,7 +254,7 @@ class PreferHTTPSAdapter(ForceHTTPSAdapter):
                         if self._prevent_https(tail):
                             return "http://" + tail
                         return response
-                    elif location.startswith("http://"):
+                    if location.startswith("http://"):
                         previous_url = current_url
                         url = location
                     else:
@@ -285,7 +285,7 @@ class PreferHTTPSAdapter(ForceHTTPSAdapter):
                             "upgrading {} to https with {}".format(url, redirect.url)
                         )
                         return redirect
-                    elif redirect != url:
+                    if redirect != url:
                         if redirect.startswith("http://"):
                             tail = url[7:]
                         else:
