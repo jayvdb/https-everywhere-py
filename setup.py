@@ -61,4 +61,7 @@ setup(
     classifiers=classifiers.splitlines(),
     tests_require=["unittest-expander", "lxml", "tldextract", "regex"],
     # lxml is optional, needed for testing upstream rules
+    entry_points = {
+        "console_scripts": ["pyhttpeverywhere = https_everywhere.__main__:CLI"]
+    }
 )

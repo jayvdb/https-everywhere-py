@@ -3,7 +3,6 @@ from __future__ import unicode_literals
 from logging_helper import setup_logging
 
 import urllib3
-from urllib3.util.url import parse_url
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -13,6 +12,7 @@ from ._rules import https_url_rewrite, _get_rulesets
 from ._chrome_preload_hsts import _preload_including_subdomains
 from ._mozilla_preload_hsts import _preload_remove_negative
 from ._util import _check_in
+from .replacers.HSTSPreloadReplacer import apply_HSTS_preload
 
 PY2 = str != "".__class__
 if PY2:
@@ -155,10 +155,7 @@ class PreloadHSTSAdapter(RedirectAdapter):
 
     def get_redirect(self, url):
         if url.startswith("http://"):
-            p = parse_url(url)
-            if _check_in(self._domains, p.host):
-                new_url = "https:" + url[5:]
-                return new_url
+            return apply_HSTS_preload(url, self._domains)
 
         return super(PreloadHSTSAdapter, self).get_redirect(url)
 
