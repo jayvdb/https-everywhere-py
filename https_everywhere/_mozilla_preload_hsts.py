@@ -1,7 +1,6 @@
 import os.path
 
 import requests
-
 from logging_helper import setup_logging
 
 from ._fetch import _storage_location
@@ -33,7 +32,7 @@ def _load_preload_data(filename):
         negative = set()
         lines = [line.strip() for line in f.readlines()]
         start = lines.index("%%")
-        lines = lines[start + 1 :]
+        lines = lines[start + 1:]
         end = lines.index("%%")
         lines = lines[:end]
         for line in lines:

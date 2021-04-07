@@ -1,6 +1,6 @@
 from requests import Session
 
-from .adapter import HTTPSEverywhereAdapter, HTTPAdapter
+from .adapter import HTTPAdapter, HTTPSEverywhereAdapter
 
 
 class HTTPSEverywhereSession(Session):

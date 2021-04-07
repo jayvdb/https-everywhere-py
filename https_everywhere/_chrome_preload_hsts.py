@@ -2,7 +2,6 @@ import json
 import os.path
 
 import requests
-
 from logging_helper import setup_logging
 
 from ._fetch import _storage_location
@@ -66,9 +65,7 @@ def _preload_including_subdomains(
         includeSubdomains = entry.get("include_subdomains")
 
         if not includeSubdomains:
-            logger.info(
-                "{}: Ignoring !include_subdomains entry: {!r}".format(name, entry)
-            )
+            logger.info("{}: Ignoring !include_subdomains entry: {!r}".format(name, entry))
             continue
 
         if remove_overlap and overlap_order_check:

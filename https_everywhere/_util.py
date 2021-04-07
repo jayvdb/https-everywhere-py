@@ -32,8 +32,6 @@ def _check_in(domains, hostname):
             return subdomain_rule
 
     if len(parts) > 4:
-        subdomain_rule = "{}.{}.{}.{}".format(
-            parts[-4], parts[-3], parts[-2], parts[-1]
-        )
+        subdomain_rule = "{}.{}.{}.{}".format(parts[-4], parts[-3], parts[-2], parts[-1])
         if subdomain_rule in domains:
             return subdomain_rule

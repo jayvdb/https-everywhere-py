@@ -1,17 +1,15 @@
 from __future__ import unicode_literals
 
-from logging_helper import setup_logging
-
-import urllib3
-from urllib3.util.url import parse_url
-
 import requests
+import urllib3
+from logging_helper import setup_logging
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.timeout import Timeout
+from urllib3.util.url import parse_url
 
-from ._rules import https_url_rewrite, _get_rulesets
 from ._chrome_preload_hsts import _preload_including_subdomains
 from ._mozilla_preload_hsts import _preload_remove_negative
+from ._rules import _get_rulesets, https_url_rewrite
 from ._util import _check_in
 
 PY2 = str != "".__class__
@@ -93,9 +91,7 @@ class RedirectAdapter(HTTPAdapter):
             url = None
         elif isinstance(rv, requests.Response):
             logger.info(
-                "adapter responding to {} with {}: {!r}".format(
-                    request.url, rv.url, rv.headers
-                )
+                "adapter responding to {} with {}: {!r}".format(request.url, rv.url, rv.headers)
             )
             rv.request = request
             rv.url = request.url
@@ -258,9 +254,7 @@ class PreferHTTPSAdapter(ForceHTTPSAdapter):
                         previous_url = current_url
                         url = location
                     else:
-                        raise RuntimeError(
-                            "{} redirected to {}".format(current_url, location)
-                        )
+                        raise RuntimeError("{} redirected to {}".format(current_url, location))
 
     def send(self, request, *args, **kwargs):
         url = request.url
@@ -281,17 +275,13 @@ class PreferHTTPSAdapter(ForceHTTPSAdapter):
                     if not isinstance(redirect, str):
                         # Following redirects may provide a redirect response object
                         # This was the modwsgi scenario
-                        logger.info(
-                            "upgrading {} to https with {}".format(url, redirect.url)
-                        )
+                        logger.info("upgrading {} to https with {}".format(url, redirect.url))
                         return redirect
                     elif redirect != url:
                         if redirect.startswith("http://"):
                             tail = url[7:]
                         else:
-                            raise RuntimeError(
-                                "Unexpectedly {} redirected to {}".format(url, redirect)
-                            )
+                            raise RuntimeError("Unexpectedly {} redirected to {}".format(url, redirect))
                 logger.info("upgrading {} to https".format(url))
 
                 response = self._generate_redirect("https://" + tail)
@@ -336,18 +326,14 @@ class SafeUpgradeHTTPSAdapter(ForceHTTPSAdapter):
         url = request.url
 
         if not url.startswith("https://"):
-            response = super(SafeUpgradeHTTPSAdapter, self).send(
-                request, *args, **kwargs
-            )
+            response = super(SafeUpgradeHTTPSAdapter, self).send(request, *args, **kwargs)
             logger.debug("http response reason: {}".format(response.reason))
             if response.reason != _REASON:  # pragma: no cover
                 return response
             request.url = response.headers["location"]
 
         try:
-            response = super(SafeUpgradeHTTPSAdapter, self).send(
-                request, *args, **kwargs
-            )
+            response = super(SafeUpgradeHTTPSAdapter, self).send(request, *args, **kwargs)
             redirect = response.headers.get("location")
             if not redirect or redirect != url:
                 return response

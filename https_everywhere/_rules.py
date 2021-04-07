@@ -10,16 +10,16 @@ from urllib3.util.url import parse_url as urlparse
 from ._fetch import fetch_update
 from ._fixme import (
     # _FIXME_MULTIPLE_RULEST_PREFIXES,
-    _FIXME_REJECT_PATTERNS,
-    _FIXME_VERY_BAD_EXPANSION,
-    _FIXME_ODD_STARS,
-    _FIXME_LEADING_STAR_GLOBS,
     _FIXME_BROKEN_REGEX_MATCHES,
+    _FIXME_LEADING_STAR_GLOBS,
+    _FIXME_ODD_STARS,
+    _FIXME_REJECT_PATTERNS,
     _FIXME_SUBDOMAIN_PREFIXES,
+    _FIXME_VERY_BAD_EXPANSION,
 )
 
 try:
-    from ._unregex import expand_pattern, ExpansionError
+    from ._unregex import ExpansionError, expand_pattern
 except ImportError:
     expand_pattern, ExpansionError = None, None
 
@@ -190,8 +190,7 @@ class _Rule(object):
             and self.pattern_hostname.replace("www.", "") == self.replacement_hostname
         ) or (
             self.pattern_hostname.startswith(r"(?:www.)?")
-            and self.pattern_hostname.replace(r"(?:www.)?", "")
-            == self.replacement_hostname
+            and self.pattern_hostname.replace(r"(?:www.)?", "") == self.replacement_hostname
         )
 
     @property
@@ -214,9 +213,7 @@ def _is_rule_only_force_https(ruleset, rule):
                 ]
             )
             if len(various_targets) == 1:
-                logger.debug(
-                    "{} == {} == {}".format(rule.pattern, targets, rule.replacement)
-                )
+                logger.debug("{} == {} == {}".format(rule.pattern, targets, rule.replacement))
                 return True
 
             logger.info("mismatch {}".format(sorted(various_targets)))
@@ -285,9 +282,7 @@ def _reduce_ruleset(ruleset):
         last_rule = _Rule(*rules[-1], ruleset=ruleset)
         if _is_rule_only_force_https(ruleset, last_rule):
             logger.warning(
-                "{} last rule of {} rules reduced to simple force https".format(
-                    ruleset, len(rules)
-                )
+                "{} last rule of {} rules reduced to simple force https".format(ruleset, len(rules))
             )
             ruleset._rules[-1] = FORCE_HTTPS_RULE_COMPILED
 
@@ -309,16 +304,12 @@ def _reduce_ruleset(ruleset):
         except ExpansionError as e:
             # TypeError occurs if sre_yield 0.2.0 was installed
             logger.info(
-                "expansion failure in rule {} {}: {}".format(
-                    ruleset.targets, ruleset.rules, e
-                )
+                "expansion failure in rule {} {}: {}".format(ruleset.targets, ruleset.rules, e)
             )
             return
         except Exception as e:  # pragma: no cover
             logger.warning(
-                "unknown failure in rule {} {}: {}".format(
-                    ruleset.targets, ruleset.rules, e
-                )
+                "unknown failure in rule {} {}: {}".format(ruleset.targets, ruleset.rules, e)
             )
             raise
         assert rule.pattern_targets
@@ -328,9 +319,7 @@ def _reduce_ruleset(ruleset):
 
         for pat in pattern_targets:
             if pat.startswith(".") or pat.endswith("."):
-                logger.info(
-                    '{} expands to invalid hostname "{}"'.format(rule.pattern, pat)
-                )
+                logger.info('{} expands to invalid hostname "{}"'.format(rule.pattern, pat))
                 continue
 
             assert set(pat) - set("(|)") == set(pat)
@@ -425,10 +414,7 @@ def _reduce_ruleset(ruleset):
                 target = targets[0]
 
                 # None with pattern and replacement that are the same as target
-                assert (
-                    target != rule.pattern_hostname
-                    or target != rule.replacement_hostname
-                )
+                assert target != rule.pattern_hostname or target != rule.replacement_hostname
 
                 if target == rule.pattern_hostname:
                     # ~120 cases
@@ -594,9 +580,7 @@ def _reduce_rules(rulesets, check=False, simplify=False):
                     continue
 
                 parts = item.split(".")
-                assert not all(
-                    part.isdigit() or part == "*" for part in parts
-                ), orig_ruleset
+                assert not all(part.isdigit() or part == "*" for part in parts), orig_ruleset
 
                 # https://github.com/EFForg/https-everywhere/issues/18897
                 if "voxmedia.com" not in item:
@@ -656,9 +640,7 @@ def _reduce_rules(rulesets, check=False, simplify=False):
                 reduced_rules.append(rule)
 
             if not reduced_rules:
-                logger.warning(
-                    "Rejecting ruleset {} as it has no usable rules".format(name)
-                )
+                logger.warning("Rejecting ruleset {} as it has no usable rules".format(name))
                 continue
 
             rules = reduced_rules
@@ -800,9 +782,7 @@ def _get_ruleset(hostname, rulesets=None):
     parts = hostname.split(".")
 
     if len(parts) > 5:
-        subdomain_rule = "*.{}.{}.{}.{}".format(
-            parts[-4], parts[-3], parts[-2], parts[-1]
-        )
+        subdomain_rule = "*.{}.{}.{}.{}".format(parts[-4], parts[-3], parts[-2], parts[-1])
         ruleset = rulesets.get(subdomain_rule)
         if ruleset:
             return ruleset
@@ -856,9 +836,7 @@ def https_url_rewrite(url, rulesets=None):
             new_url = rule[0].sub(rule[1], url)
         except Exception as e:  # pragma: no cover
             logger.warning(
-                "failed during rule {} -> {} , input {}: {}".format(
-                    rule[0], rule[1], url, e
-                )
+                "failed during rule {} -> {} , input {}: {}".format(rule[0], rule[1], url, e)
             )
             raise
 
