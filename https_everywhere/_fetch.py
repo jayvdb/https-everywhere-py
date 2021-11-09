@@ -4,7 +4,7 @@ import json
 import os
 import os.path
 
-import appdirs
+import platformdirs
 import requests
 
 base_url = "https://www.https-rulesets.org/v1/"
@@ -12,7 +12,7 @@ _ts = None
 
 
 def _storage_location(filename=None, timestamp=None):
-    cache_dir = appdirs.user_cache_dir("https-everywhere-py")
+    cache_dir = platformdirs.user_cache_dir("https-everywhere-py")
     try:
         os.makedirs(cache_dir, exist_ok=True)
     except TypeError:
