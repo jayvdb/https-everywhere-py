@@ -3,8 +3,7 @@ import os.path
 
 import requests
 
-from logging_helper import setup_logging
-
+from .logging import setup_logging
 from ._fetch import _storage_location
 from ._util import _check_in, _reverse_host
 

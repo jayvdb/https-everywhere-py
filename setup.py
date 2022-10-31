@@ -55,9 +55,11 @@ setup(
     install_requires=[
         "requests[security]",
         "appdirs",
-        "logging-helper",
         "cached-property",
     ],
+    extras_requires = {
+        "logging": ["logging-helper",],
+    },
     classifiers=classifiers.splitlines(),
     tests_require=["unittest-expander", "lxml", "tldextract", "regex"],
     # lxml is optional, needed for testing upstream rules

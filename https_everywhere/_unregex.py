@@ -1,7 +1,5 @@
 import sre_parse
 
-from logging_helper import setup_logging
-
 import urllib3
 from urllib3.util.url import parse_url as urlparse
 
@@ -12,6 +10,7 @@ from ._fixme import (
     _FIXME_SUBDOMAIN_SUFFIXES,
     _FIXME_EXTRA_REPLACEMENTS,
 )
+from .logging import setup_logging
 
 logger = setup_logging()
 valid_host_char = set(
