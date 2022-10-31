@@ -5,8 +5,8 @@ def _reverse_host(host, trailing_dot=True):
     rv = ".".join(reversed(host.split(".")))
     if trailing_dot:
         return rv + "."
-    else:
-        return rv
+
+    return rv
 
 
 def _check_in(domains, hostname):

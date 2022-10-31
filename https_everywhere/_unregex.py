@@ -63,8 +63,8 @@ def expand_pattern(pattern, max_count=100):
                             s, sorted(set(p.host) - valid_host_char)
                         )
                     )
-                else:
-                    return [p.host]
+
+                return [p.host]
             except urllib3.exceptions.LocationParseError:  # pragma: no cover
                 # TODO: build test case for this
                 pass
@@ -130,11 +130,11 @@ def split_regex(pattern, at, remainer=False):
             found = True
             del pattern[i]
             continue
-        elif not found and tok == sre_parse.IN and (sre_parse.LITERAL, ord(at)) in val:
+        if not found and tok == sre_parse.IN and (sre_parse.LITERAL, ord(at)) in val:
             found = True
             del pattern[i]
             continue
-        elif not found and tok == sre_parse.MAX_REPEAT:
+        if not found and tok == sre_parse.MAX_REPEAT:
             val = val[2]
             if (sre_parse.LITERAL, ord(at)) in val:
                 found = True
