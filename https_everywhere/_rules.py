@@ -821,19 +821,32 @@ def _get_ruleset(hostname, rulesets=None):
 
     logger.debug("no ruleset matches {}".format(hostname))
 
+from icecream import ic
+
+def _remove_trailing_slash(url):
+    if url[-1] == "/":
+        url = url[:-1]
+    return url
 
 def https_url_rewrite(url, rulesets=None):
+    orig_url = url
     if isinstance(url, str):
         # In HTTPSEverywhere, URLs must contain a '/'.
         if url.replace("http://", "").find("/") == -1:
             url += "/"
+            remove_trailing_slash_if_needed = _remove_trailing_slash
         parsed_url = urlparse(url)
     else:
+        remove_trailing_slash_if_needed = lambda x: x
+
         parsed_url = url
         if hasattr(parsed_url, "geturl"):
             url = parsed_url.geturl()
         else:
             url = str(parsed_url)
+
+    if parsed_url.scheme is None or parsed_url.host is None:
+        return orig_url
 
     try:
         ruleset = _get_ruleset(parsed_url.host, rulesets)
@@ -841,19 +854,19 @@ def https_url_rewrite(url, rulesets=None):
         ruleset = _get_ruleset(parsed_url.netloc, rulesets)
 
     if not ruleset:
-        return url
+        return orig_url
 
     if not isinstance(ruleset, _Ruleset):
         ruleset = _Ruleset(ruleset[0], ruleset[1])
 
     if ruleset.exclude_url(url):
-        return url
+        return orig_url
 
     # process rules
     for rule in ruleset.rules:
         logger.debug("checking rule {} -> {}".format(rule[0], rule[1]))
         try:
-            new_url = rule[0].sub(rule[1], url)
+            count, new_url = rule[0].subn(rule[1], url)
         except Exception as e:  # pragma: no cover
             logger.warning(
                 "failed during rule {} -> {} , input {}: {}".format(
@@ -863,7 +876,7 @@ def https_url_rewrite(url, rulesets=None):
             raise
 
         # stop if this rule was a hit
-        if new_url != url:
-            return new_url
+            if count:
+                return remove_trailing_slash_if_needed(new_url)
 
-    return url
+    return orig_url
