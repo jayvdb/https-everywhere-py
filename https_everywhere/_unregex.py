@@ -1,16 +1,14 @@
 import sre_parse
 
-from logging_helper import setup_logging
-
+import sre_yield
 import urllib3
+from logging_helper import setup_logging
 from urllib3.util.url import parse_url as urlparse
 
-import sre_yield
-
 from ._fixme import (
+    _FIXME_EXTRA_REPLACEMENTS,
     _FIXME_SUBDOMAIN_PREFIXES,
     _FIXME_SUBDOMAIN_SUFFIXES,
-    _FIXME_EXTRA_REPLACEMENTS,
 )
 
 logger = setup_logging()
@@ -69,9 +67,7 @@ def expand_pattern(pattern, max_count=100):
                 # TODO: build test case for this
                 pass
 
-        pattern = pattern_without_subdomain_prefix.replace("*.", "~~").replace(
-            ".*", ",,"
-        )
+        pattern = pattern_without_subdomain_prefix.replace("*.", "~~").replace(".*", ",,")
 
     for match, replacement in _FIXME_EXTRA_REPLACEMENTS:
         pattern = pattern.replace(match, replacement)
@@ -85,9 +81,7 @@ def expand_pattern(pattern, max_count=100):
     try:
         rv = sre_yield.AllStrings(c, max_count=10, relaxed=True)[: max_count + 1]
     except TypeError:
-        raise ExpansionError(
-            "sre_yield 0.2.0 installed; please install master for expansion"
-        )
+        raise ExpansionError("sre_yield 0.2.0 installed; please install master for expansion")
 
     # https://github.com/google/sre_yield/issues/16
     assert rv.__len__() <= max_count + 1, (rv.__len__(), max_count, pattern, c)
